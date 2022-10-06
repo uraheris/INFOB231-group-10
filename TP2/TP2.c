@@ -46,8 +46,11 @@ void main() {
 
     while(1) {
         character = getchar();
-        buffer[counter] = toupper(character);
+        // don't add line breaks
+        if (character != '\n') {
+            buffer[counter] = toupper(character);
         counter++;
+        }
     }
 }
 
