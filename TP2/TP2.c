@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
+#include <ctype.h>
 
 char buffer[1000];
 int counter = 0;
@@ -45,7 +46,7 @@ void main() {
 
     while(1) {
         character = getchar();
-        buffer[counter] = character;
+        buffer[counter] = toupper(character);
         counter++;
     }
 }
