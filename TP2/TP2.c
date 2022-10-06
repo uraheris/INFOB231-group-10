@@ -3,11 +3,12 @@
 #include <signal.h>
 #include <unistd.h>
 
-char buffer[42];
+char buffer[1000];
 int counter = 0;
 char character;
 int empty = 0;
 
+// function to check if a char array is empty or not
 int isEmpty(char string[]) {
     for (int i = 0; i < sizeof(string); i++) {
         if (string[i] != ' ') {
@@ -20,13 +21,15 @@ int isEmpty(char string[]) {
 void handler(int signum) {
 
     if (signum == SIGALRM) {
+        // terminate execution if the buffer is empty
         if (isEmpty(buffer)) {
             printf("Bye\n");
             exit(0);
         }
+        // print what's in the buffer and empty it
         else {
             printf("%s\n", buffer);
-            for (int i = 0; i < 42; i++) {
+            for (int i = 0; i < 1000; i++) {
                 buffer[i] = ' ';
             }
             counter = 0;
@@ -42,7 +45,6 @@ void main() {
     alarm(5);
 
     while(1) {
-        printf("Enter a character: ");
         character = getchar();
         buffer[counter] = character;
         counter++;
