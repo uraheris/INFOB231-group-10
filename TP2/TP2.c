@@ -6,7 +6,6 @@
 char buffer[1000];
 int counter = 0;
 char character;
-int empty = 0;
 
 // function to check if a char array is empty or not
 int isEmpty(char string[]) {
