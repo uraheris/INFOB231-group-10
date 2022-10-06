@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
+#include <string.h>
 
-int bufferSize = 0;
-char buffer[0];
+char buffer[] = "";
 char character;
 
 void handler(int signum) {
@@ -15,8 +15,11 @@ void handler(int signum) {
         }
         else {
             printf("Alarm\n");
+            // empty the buffer
+            // we'd like the size to be reset as well, but that's not possible in C
         }
     }
+    alarm(5);
 }
 
 void main() {
@@ -26,10 +29,8 @@ void main() {
     alarm(5);
 
     while(1) {
-        bufferSize++;
         printf("Enter a character: ");
         character = getchar();
-        buffer[bufferSize] = character;
+        buffer[sizeof(buffer)] = character;
     }
-
 }
