@@ -3,19 +3,33 @@
 #include <signal.h>
 #include <unistd.h>
 
-char buffer[] = "";
+char buffer[42];
+int counter = 0;
 char character;
+int empty = 0;
+
+int isEmpty(char string[]) {
+    for (int i = 0; i < sizeof(string); i++) {
+        if (string[i] != ' ') {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 void handler(int signum) {
+
     if (signum == SIGALRM) {
-        if (sizeof(buffer) == 0) {
+        if (isEmpty(buffer)) {
             printf("Bye\n");
             exit(0);
         }
         else {
-            printf("Alarm\n");
-            // empty the buffer
-            // we'd like the size to be reset as well, but that's not possible in C
+            printf("%s\n", buffer);
+            for (int i = 0; i < 42; i++) {
+                buffer[i] = ' ';
+            }
+            counter = 0;
         }
     }
     alarm(5);
@@ -30,6 +44,7 @@ void main() {
     while(1) {
         printf("Enter a character: ");
         character = getchar();
-        buffer[sizeof(buffer)] = character;
+        buffer[counter] = character;
+        counter++;
     }
 }
