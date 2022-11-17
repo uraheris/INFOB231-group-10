@@ -12,14 +12,23 @@ void *merge_sort(int array[], index start, index final);
 void *merge_sort(int array[], index start, index final) {
   if(start < final) {
     index middle = floor((start + final) / 2);
+
+    printf("Test before split\n");
+
+    // initializing children threads
     pthread_t secondaryThread;
     pthread_t tertiaryThread;
+
     // this is where we split threads
     pthread_create(&secondaryThread, NULL, merge_sort(array, start, middle), NULL);
     pthread_create(&tertiaryThread, NULL, merge_sort(array, middle+1, final), NULL);
 
+    printf("Test after split\n");
+
     pthread_join(secondaryThread, (void*) &array);
     pthread_join(tertiaryThread, (void*) &array);
+
+    printf("Test after join\n");
     
     // this is where we merge what our children threads have returned
     merge(array, start, middle, final);
