@@ -1,14 +1,15 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h> // don't forget to compile with -pthread
 
 typedef unsigned int index;
 typedef unsigned int length;
 
 void merge(int array[], index start, index middle, index final);
-void merge_sort(int array[], index start, index final);
+void *merge_sort(int array[], index start, index final);
 
-void merge_sort(int array[], index start, index final) {
+void *merge_sort(int array[], index start, index final) {
   if(start < final) {
     index middle = floor((start + final) / 2);
     merge_sort(array, start, middle);
@@ -71,10 +72,17 @@ void show(int array[], length count) {
   printf("\n");
 }
 
+struct mergeSortArgs {
+  int *tableau[8];
+  int startIndex;
+  int endIndex;
+};
+
 int main(int argc, char* argv[]) {
   show(tableau, longueur);
 
-  merge_sort(tableau, 0, longueur-1);
+  pthread_t secondary ;
+  pthread_create(& secondary , NULL , merge_sort(tableau, 0, longueur-1) , NULL );
 
   show(tableau, longueur);
 
