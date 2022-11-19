@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h> // don't forget to compile with -pthread
+# include <time.h>
 
 typedef unsigned int index;
 typedef unsigned int length;
@@ -63,7 +64,14 @@ void merge(int array[], index start, index middle, index final) {
   free(arrayR);
 }
 
-int tableau[] = { 2 , 27 , 3 , 49 , 98 , 12 , 4 , 1 };
+// function to calculate time elapsed between two timestamps
+long int nanos_between ( struct timespec * final , struct timespec * start ) {
+  time_t seconds = final->tv_sec - start->tv_sec;
+  long int nanoseconds = final->tv_nsec - start->tv_nsec;
+  return seconds * 1e9 + nanoseconds ;
+}
+
+int tableau[] = { 2 , 27 , 3 , 49 , 98 , 12 , 4 , 1 , 42 };
 int longueur = sizeof(tableau) / sizeof(int);
 
 void show(int array[], length count) {
@@ -72,19 +80,46 @@ void show(int array[], length count) {
   printf("\n");
 }
 
-struct mergeSortArgs {
-  int *tableau[8];
-  int startIndex;
-  int endIndex;
-};
+void *multiThreadMerge(int numberOfThreads, int threadsAlreadyCreated, index startIndex, index endIndex) {
+  
+  index middle = floor((startIndex + endIndex) / 2);
+
+  if (numberOfThreads > threadsAlreadyCreated) {
+    // threads initialization
+    pthread_t subThread1;
+    pthread_t subThread2;
+
+    // create two more threads (one level lower)
+    pthread_create(&subThread1 , NULL , multiThreadMerge(numberOfThreads, threadsAlreadyCreated *2, startIndex, middle) , NULL );
+    pthread_create(&subThread2 , NULL , multiThreadMerge(numberOfThreads, threadsAlreadyCreated *2, middle+1, endIndex) , NULL );
+
+    // merge what the two children threads have done
+    merge(tableau, 0, middle, endIndex);
+  }
+  else {
+    // merge sort
+    merge_sort(tableau, 0, middle);
+    merge_sort(tableau, middle+1, endIndex);
+    merge(tableau, startIndex, middle, endIndex);
+  }
+}
 
 int main(int argc, char* argv[]) {
+  struct timespec start, final;
+  // get time before execution
+  clock_gettime(CLOCK_REALTIME, &start);
+  
   show(tableau, longueur);
 
-  pthread_t secondary ;
-  pthread_create(& secondary , NULL , merge_sort(tableau, 0, longueur-1) , NULL );
+  // change the first parameter to the number of threads of the last level we want
+  multiThreadMerge(8, 1, 0, longueur-1);
 
   show(tableau, longueur);
 
+  // get time after execution
+  clock_gettime(CLOCK_REALTIME, &final);
+
+  // print elapsed time
+  printf ("Time elapsed: %ld ns\n", nanos_between(&final, &start));
   return EXIT_SUCCESS;
 }
