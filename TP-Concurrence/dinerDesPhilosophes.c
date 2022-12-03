@@ -51,13 +51,16 @@ void drop(int me)
 
 void think(int me)
 {
-    printf("%d is eating\n", me);
+    printf("%d starts thinking\n", me);
     sleep(1);
+    printf("%d is hungry\n", me);
 }
 
 void eat(int me)
 {
-    printf("%d is eating\n", me);
+    printf("%d starts eating\n", me);
+    sleep(1);
+    printf("%d is done eating\n", me);
 }
 
 void *philosopher(int me)
