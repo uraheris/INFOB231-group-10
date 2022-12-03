@@ -38,6 +38,7 @@ int pick_up(int me)
         baguettes[RIGHT(me)] = AVAILABLE;
         return 0;
     }
+
     // both baguettes could be taken
     return 1;
 }
