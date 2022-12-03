@@ -14,11 +14,26 @@ pthread_t philosophers[NB_PHILOSOPHERS];
 #define AVAILABLE 0
 #define UNAVAILABLE 1
 
-int baguettes[NB_PHILOSOPHERS];
+int baguettes[NB_PHILOSOPHERS] = { 0 }; // all baguettes are initially available
 
-void pick_up(int me) {
-    baguettes[RIGHT(me)] = UNAVAILABLE;
-    baguettes[LEFT(me)] = UNAVAILABLE;
+int pick_up(int me) {
+    // try to take first baguette
+    if (baguettes[RIGHT(me)] == AVAILABLE) {
+        baguettes[RIGHT(me)] = UNAVAILABLE;
+    }
+    else {
+        return 0;
+    }
+
+    // try to take second baguette
+    if (baguettes[LEFT(me)] == AVAILABLE){
+        baguettes[LEFT(me)] = UNAVAILABLE;
+    }
+    else {
+        return 0;
+    }
+    // both baguettes could be taken
+    return 1;
 }
 
 void drop(int me) {
@@ -38,9 +53,11 @@ void eat(int me) {
 void* philosopher(int me) {
     while(1) {
         think(me);
-        pick_up(me);
-        eat(me);
-        drop(me);
+        if (pick_up(me) == 1) {
+            // this will only happen if both baguettes could be taken
+            eat(me);
+            drop(me);
+        }
     }
 }
 
