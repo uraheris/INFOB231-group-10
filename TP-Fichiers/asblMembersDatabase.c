@@ -1,23 +1,26 @@
-# include <stdio.h>
-# include <stdlib.h>
-# include <fcntl.h>
-# include <string.h>
-# include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
 
-struct member {
+struct member
+{
     char firstName[20];
     char lastName[20];
-    char phone[10];    
+    char phone[10];
     char email[30];
     int isActive;
 };
 
-void addMember(struct member member, char filePath[]) {
+void addMember(struct member member, char filePath[])
+{
     // open file
     int dataBaseFile = open(filePath, O_RDWR | O_CREAT);
 
     // check if file could be opened
-    if (dataBaseFile == -1) {
+    if (dataBaseFile == -1)
+    {
         printf("Could not open file\n");
         exit(1);
     }
@@ -27,8 +30,10 @@ void addMember(struct member member, char filePath[]) {
     int memberCounter = 0;
 
     // if there is an empty member, move file pointer to that member
-    while (read(dataBaseFile, &tempMember, sizeof(struct member)) > 0 && emptyMemberFound == 0) {
-        if (strcmp(tempMember.firstName, "") == 0) {
+    while (read(dataBaseFile, &tempMember, sizeof(struct member)) > 0 && emptyMemberFound == 0)
+    {
+        if (strcmp(tempMember.firstName, "") == 0)
+        {
             lseek(dataBaseFile, memberCounter * sizeof(struct member), SEEK_SET);
             printf("Empty member found\n");
             emptyMemberFound = 1;
@@ -44,7 +49,8 @@ void addMember(struct member member, char filePath[]) {
     }
 
     // if there is no empty member, move file pointer to end of file
-    if (emptyMemberFound == 0) {
+    if (emptyMemberFound == 0)
+    {
         printf("No empty member found\n");
         lseek(dataBaseFile, 0, SEEK_END);
 
@@ -57,20 +63,24 @@ void addMember(struct member member, char filePath[]) {
     }
 }
 
-void deleteMember(char email[], char filePath[]) {
+void deleteMember(char email[], char filePath[])
+{
     // open file
     int dataBaseFile = open(filePath, O_RDWR);
     // check if file could be opened
-    if (dataBaseFile == -1) {
+    if (dataBaseFile == -1)
+    {
         printf("Could not open file\n");
         exit(1);
     }
     // read file
     struct member readMember;
     int memberCounter = 0;
-    while (read(dataBaseFile, &readMember, sizeof(struct member)) > 0) {
+    while (read(dataBaseFile, &readMember, sizeof(struct member)) > 0)
+    {
         // check if member is the one to be deleted
-        if (strcmp(readMember.email, email) == 0) {
+        if (strcmp(readMember.email, email) == 0)
+        {
             lseek(dataBaseFile, memberCounter * sizeof(struct member), SEEK_SET);
             struct member voidMember = {"", "", "", "", 0};
             write(dataBaseFile, &voidMember, sizeof(struct member));
@@ -81,20 +91,24 @@ void deleteMember(char email[], char filePath[]) {
     close(dataBaseFile);
 }
 
-void listMembers(char filePath[], int isActive) {
+void listMembers(char filePath[], int isActive)
+{
     // open file
     int dataBaseFile = open(filePath, O_RDONLY);
 
     // check if file could be opened
-    if (dataBaseFile == -1) {
+    if (dataBaseFile == -1)
+    {
         printf("Could not open file\n");
         exit(1);
     }
 
     // read file
     struct member readMember;
-    while (read(dataBaseFile, &readMember, sizeof(struct member)) > 0) {
-        if (strcmp(readMember.firstName, "") != 0 && readMember.isActive == isActive) {
+    while (read(dataBaseFile, &readMember, sizeof(struct member)) > 0)
+    {
+        if (strcmp(readMember.firstName, "") != 0 && readMember.isActive == isActive)
+        {
             printf("Prénom: %s\n", readMember.firstName);
             printf("Nom: %s\n", readMember.lastName);
             printf("Téléphone: %s\n", readMember.phone);
@@ -106,20 +120,24 @@ void listMembers(char filePath[], int isActive) {
     close(dataBaseFile);
 }
 
-void showMemberInfo(char filePath[], char name[]) {
+void showMemberInfo(char filePath[], char name[])
+{
     // open file
     int dataBaseFile = open(filePath, O_RDONLY);
 
     // check if file could be opened
-    if (dataBaseFile == -1) {
+    if (dataBaseFile == -1)
+    {
         printf("Could not open file\n");
         exit(1);
     }
 
     // read file
     struct member readMember;
-    while (read(dataBaseFile, &readMember, sizeof(struct member)) > 0) {
-        if (strcmp(readMember.lastName, name) == 0) {
+    while (read(dataBaseFile, &readMember, sizeof(struct member)) > 0)
+    {
+        if (strcmp(readMember.lastName, name) == 0)
+        {
             printf("Prénom: %s\n", readMember.firstName);
             printf("Nom: %s\n", readMember.lastName);
             printf("Téléphone: %s\n", readMember.phone);
@@ -155,7 +173,7 @@ int main(int argc, char const *argv[])
             char phone[10];
             char email[30];
             int isActive;
-            
+
             // get user input
             printf("Entrez le prénom du membre: \n");
             scanf("%s", firstName);
