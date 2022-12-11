@@ -22,7 +22,7 @@ void addMember(struct member member, char filePath[])
     if (dataBaseFile == -1)
     {
         printf("Could not open file\n");
-        exit(1);
+        return;
     }
 
     struct member tempMember;
@@ -35,7 +35,6 @@ void addMember(struct member member, char filePath[])
         if (strcmp(tempMember.firstName, "") == 0)
         {
             lseek(dataBaseFile, memberCounter * sizeof(struct member), SEEK_SET);
-            printf("Empty member found\n");
             emptyMemberFound = 1;
 
             // write member to file
@@ -43,6 +42,7 @@ void addMember(struct member member, char filePath[])
 
             // close file
             close(dataBaseFile);
+            printf("Membre ajouté avec succès\n\n");
             return;
         }
         memberCounter++;
@@ -51,7 +51,6 @@ void addMember(struct member member, char filePath[])
     // if there is no empty member, move file pointer to end of file
     if (emptyMemberFound == 0)
     {
-        printf("No empty member found\n");
         lseek(dataBaseFile, 0, SEEK_END);
 
         // write member to file
@@ -59,6 +58,7 @@ void addMember(struct member member, char filePath[])
 
         // close file
         close(dataBaseFile);
+        printf("Membre ajouté avec succès\n\n");
         return;
     }
 }
@@ -71,22 +71,36 @@ void deleteMember(char email[], char filePath[])
     if (dataBaseFile == -1)
     {
         printf("Could not open file\n");
-        exit(1);
+        return;
     }
     // read file
-    struct member readMember;
+    int memberFound = 0;
     int memberCounter = 0;
+    struct member readMember;
     while (read(dataBaseFile, &readMember, sizeof(struct member)) > 0)
     {
         // check if member is the one to be deleted
         if (strcmp(readMember.email, email) == 0)
         {
+            memberFound = 1;
             lseek(dataBaseFile, memberCounter * sizeof(struct member), SEEK_SET);
             struct member voidMember = {"", "", "", "", 0};
             write(dataBaseFile, &voidMember, sizeof(struct member));
         }
         memberCounter++;
     }
+
+    // member found
+    if (memberFound == 0)
+    {
+        printf("Membre non trouvé\n\n");
+    }
+    // member not found
+    else
+    {
+        printf("Membre supprimé avec succès\n\n");
+    }
+
     // close file
     close(dataBaseFile);
 }
@@ -100,15 +114,20 @@ void listMembers(char filePath[], int isActive)
     if (dataBaseFile == -1)
     {
         printf("Could not open file\n");
-        exit(1);
+        return;
     }
 
-    // read file
+    // print header
+    (isActive == 1) ? printf("\n_Liste des membres actifs_ \n") : printf("_Liste des membres inactifs_ \n");
+    
+    // read file and print members
+    int memberFound = 0;
     struct member readMember;
     while (read(dataBaseFile, &readMember, sizeof(struct member)) > 0)
     {
         if (strcmp(readMember.firstName, "") != 0 && readMember.isActive == isActive)
         {
+            memberFound = 1;
             printf("Prénom: %s\n", readMember.firstName);
             printf("Nom: %s\n", readMember.lastName);
             printf("Téléphone: %s\n", readMember.phone);
@@ -116,6 +135,13 @@ void listMembers(char filePath[], int isActive)
             printf("Actif: %d\n\n", readMember.isActive);
         }
     }
+
+    // no member found
+    if (memberFound == 0)
+    {
+        printf("Aucun membre trouvé\n\n");
+    }
+
     // close file
     close(dataBaseFile);
 }
@@ -129,15 +155,20 @@ void showMemberInfo(char filePath[], char name[])
     if (dataBaseFile == -1)
     {
         printf("Could not open file\n");
-        exit(1);
+        return;
     }
 
-    // read file
+    // print header
+    printf("\n_Informations du membre_ \n");
+
+    // read file and print info
+    int memberFound = 0;
     struct member readMember;
     while (read(dataBaseFile, &readMember, sizeof(struct member)) > 0)
     {
         if (strcmp(readMember.lastName, name) == 0)
         {
+            memberFound = 1;
             printf("Prénom: %s\n", readMember.firstName);
             printf("Nom: %s\n", readMember.lastName);
             printf("Téléphone: %s\n", readMember.phone);
@@ -145,6 +176,13 @@ void showMemberInfo(char filePath[], char name[])
             printf("Actif: %d\n\n", readMember.isActive);
         }
     }
+
+    // member not found
+    if (memberFound == 0)
+    {
+        printf("Membre non trouvé\n\n");
+    }
+
     // close file
     close(dataBaseFile);
 }
@@ -154,13 +192,14 @@ int main(int argc, char const *argv[])
     char selection;
     do
     {
+        printf("\n\n__Menu__\n");
         printf("1. Ajouter un membre\n");
         printf("2. Retirer un membre\n");
         printf("3. Lister les membres\n");
         printf("4. Afficher les informations d'un membre\n");
         printf("q. Quitter\n\n");
 
-        printf("Entrez votre sélection: \n");
+        printf("Entrez votre sélection: ");
         scanf("%c", &selection);
 
         switch (selection)
@@ -175,15 +214,15 @@ int main(int argc, char const *argv[])
             int isActive;
 
             // get user input
-            printf("Entrez le prénom du membre: \n");
+            printf("Entrez le prénom du membre: ");
             scanf("%s", firstName);
-            printf("Entrez le nom du membre: \n");
+            printf("Entrez le nom du membre: ");
             scanf("%s", lastName);
-            printf("Entrez le numéro de téléphone du membre: \n");
+            printf("Entrez le numéro de téléphone du membre: ");
             scanf("%s", phone);
-            printf("Entrez l'adresse email du membre: \n");
+            printf("Entrez l'adresse email du membre: ");
             scanf("%s", email);
-            printf("Le membres est-il actif? (1 = oui, 0 = non) \n");
+            printf("Le membres est-il actif? (1 = oui, 0 = non): ");
             scanf("%d", &isActive);
 
             // create member
@@ -195,7 +234,6 @@ int main(int argc, char const *argv[])
             newMember.isActive = isActive;
             addMember(newMember, "asblMembersDatabase.txt");
 
-            printf("Membre ajouté avec succès\n\n");
             break;
 
         case '2':
@@ -210,7 +248,6 @@ int main(int argc, char const *argv[])
             // delete member
             deleteMember(emailToDelete, "asblMembersDatabase.txt");
 
-            printf("Membre retiré avec succès\n\n");
             break;
 
         case '3':
@@ -218,25 +255,13 @@ int main(int argc, char const *argv[])
             // ask user if he wants to list active or inactive members
             printf("Vous pouvez choisir de lister les membres actifs ou inactifs\n");
             printf("1. Actifs\n");
-            printf("2. Inactifs\n");
+            printf("0. Inactifs\n\n");
 
             // get user input
-            printf("Entrez votre sélection: \n");
-            scanf("%c", &selection);
-            switch (selection)
-            {
-            case '1':
-                listMembers("asblMembersDatabase.txt", 1);
-                break;
-
-            case '2':
-                listMembers("asblMembersDatabase.txt", 0);
-                break;
-
-            default:
-                printf("L'action n'existe pas \n\n");
-                break;
-            }
+            int isActiveSelection;
+            printf("Entrez votre sélection: ");
+            scanf("%d", &isActiveSelection);
+            listMembers("asblMembersDatabase.txt", isActiveSelection);
             break;
 
         case '4':
@@ -245,7 +270,7 @@ int main(int argc, char const *argv[])
             char name[20];
 
             // get user input
-            printf("Entrez le nom du membre: \n");
+            printf("Entrez le nom du membre: ");
             scanf("%s", name);
 
             // show member info
@@ -258,7 +283,7 @@ int main(int argc, char const *argv[])
             break;
 
         default:
-            printf("L'action n'existe pas \n\n");
+            printf("L'action n'existe pas\n\n");
             break;
         }
 
